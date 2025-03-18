@@ -21,22 +21,24 @@ public class ManejadorClienteIndividual implements Runnable {
             in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
             out = new PrintWriter(cliente.getOutputStream(), true);
 
-            // Recibir nombre del cliente
+            // Recibe el nombre del cliente
             out.println("Bienvenido al Ahorcado Individual. Introduce tu nombre:");
             String nombre = in.readLine();
             if (nombre == null) return;
             System.out.println("Jugador conectado: " + nombre);
 
-            // Obtener una palabra aleatoria
+            // obtiene una palabra aleatoria
             String palabra = utilidades.PalabraAPI.obtenerPalabra();
             StringBuilder palabraOculta = new StringBuilder(ocultarPalabra(palabra));
             boolean partidaTerminada = false;
+            int intentosRestantes = 7; // Contador de intentos
 
             out.println("¡Partida individual iniciada!");
             out.println("Adivina la palabra: " + palabraOculta);
+            out.println("Tienes " + intentosRestantes + " intentos restantes.");
 
             // Bucle principal del juego
-            while (!partidaTerminada) {
+            while (!partidaTerminada && intentosRestantes > 0) {
                 out.println("Introduce una letra o la palabra completa:");
                 String intento = in.readLine();
 
@@ -57,14 +59,18 @@ public class ManejadorClienteIndividual implements Runnable {
                     if (acierto) {
                         out.println("¡Correcto! La letra " + intento + " está en la palabra.");
                     } else {
+                        intentosRestantes--; // Reducir intentos restantes
                         out.println("Incorrecto. La letra " + intento + " no está en la palabra.");
+                        out.println("Te quedan " + intentosRestantes + " intentos.");
                     }
                 } else {
                     if (intento.equalsIgnoreCase(palabra)) {
                         out.println("¡Felicidades! Has adivinado la palabra: " + palabra);
                         partidaTerminada = true;
                     } else {
+                        intentosRestantes--; // Reducir intentos restantes
                         out.println("Incorrecto. La palabra no es " + intento + ".");
+                        out.println("Te quedan " + intentosRestantes + " intentos.");
                     }
                 }
 
@@ -73,16 +79,21 @@ public class ManejadorClienteIndividual implements Runnable {
                     partidaTerminada = true;
                 }
 
+                if (intentosRestantes == 0) {
+                    out.println("¡Oh no! Te has quedado sin intentos. La palabra era: " + palabra);
+                    partidaTerminada = true;
+                }
+
                 out.println("Palabra actual: " + palabraOculta);
             }
 
-            // Notificar que la partida ha terminado
+            // Notifica que la partida ha terminado
             out.println("La partida ha terminado. Gracias por jugar. ¡Hasta la próxima!");
             out.println("FIN"); // Mensaje especial para indicar el fin del programa
             cliente.close(); // Cerrar la conexión con el cliente
 
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 
