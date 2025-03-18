@@ -42,7 +42,7 @@ public class ClienteAhorcadoIndividual {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 }
