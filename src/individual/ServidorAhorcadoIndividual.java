@@ -19,7 +19,7 @@ public class ServidorAhorcadoIndividual {
                 new Thread(manejador).start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 }
