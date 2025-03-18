@@ -29,7 +29,7 @@ public class ManejadorClienteMultijugador implements Runnable {
             in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
             out = new PrintWriter(cliente.getOutputStream(), true);
 
-            // Recibir nombre del cliente
+            // Recibe nombre del cliente
             out.println("Bienvenido al Ahorcado Multijugador. Introduce tu nombre:");
             nombre = in.readLine();
             if (nombre == null) return;
@@ -40,26 +40,31 @@ public class ManejadorClienteMultijugador implements Runnable {
                 jugadoresEnEspera.add(this);
                 out.println("Esperando a que se unan más jugadores...");
 
+                // Si hay menos de 2 jugadores se espera
+                if (jugadoresEnEspera.size() < 2) {
+                    out.println("Necesitamos al menos 2 jugadores para comenzar. Por favor, espera...");
+                    jugadoresEnEspera.wait(); // Esperar a que se conecte otro jugador
+                }
+
+                // Cuando hay 2 jugadores se inicia la partida
                 if (jugadoresEnEspera.size() >= 2) {
                     palabra = utilidades.PalabraAPI.obtenerPalabra();
                     palabraOculta = new StringBuilder(ocultarPalabra(palabra));
                     partidaTerminada = false;
-                    jugadoresEnEspera.notifyAll();
-                } else {
-                    jugadoresEnEspera.wait();
+                    jugadoresEnEspera.notifyAll(); // Notificar a todos los jugadores
                 }
             }
 
-            // Iniciar partida multijugador
+            // Inicia partida multijugador
             iniciarPartidaMultijugador();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         } finally {
             try {
                 cliente.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace(System.err);
             }
         }
     }
@@ -123,7 +128,7 @@ public class ManejadorClienteMultijugador implements Runnable {
                 Thread.sleep(1000);
             }
 
-            // Notificar a ambos jugadores que la partida ha terminado
+            // Notifica a ambos jugadores que la partida ha terminado
             synchronized (jugadoresEnEspera) {
                 for (ManejadorClienteMultijugador jugador : jugadoresEnEspera) {
                     jugador.out.println("La partida ha terminado. El ganador es: " + nombre);
@@ -135,7 +140,7 @@ public class ManejadorClienteMultijugador implements Runnable {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 
